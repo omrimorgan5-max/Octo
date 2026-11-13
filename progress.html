@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octo - Your Progress & Achievements</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        octo: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#0f172a',
+                            950: '#030712',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .brand-name {
+            font-family: 'Outfit', sans-serif;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.15);
+        }
+        .achievement-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .achievement-card.unlocked {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-slate-900">
+
+    <!-- Loading Screen (Preloader with Octo GIF) -->
+    <div id="preloader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500">
+        <div class="relative flex flex-col items-center gap-4 p-8 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl max-w-xs w-full mx-4 text-center">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl blur opacity-40"></div>
+                <img src="icons/Octo-dark.gif" alt="Loading Logo" class="relative w-20 h-20 object-contain rounded-xl bg-slate-950 p-1">
+            </div>
+            
+            <div class="space-y-1">
+                <span class="brand-name text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400">OCTO</span>
+                <p class="text-xs text-slate-400 font-medium">Calculating your learning metrics...</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 w-0 transition-all duration-300 ease-out"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-grow flex flex-col">
+        <!-- Compact Header Navigation -->
+        <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3 transition-all duration-200">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- Brand with GIF Logo -->
+                <div class="logo">
+                    <a href="index.html" class="flex items-center gap-3 group">
+                        <div class="relative">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-75 transition duration-300"></div>
+                            <img src="icons/Octo-dark.gif" alt="Octo logo" class="main-logo relative w-10 h-10 object-contain rounded-lg bg-slate-900 border border-slate-700/60 p-0.5" id="logo">
+                        </div>
+                        <span class="brand-name text-2xl font-extrabold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-400 transition-all">
+                            Octo
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="navigation hidden md:block">
+                    <ul class="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-sm font-medium">
+                        <li><a href="index.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Dashboard</a></li>
+                        <li><a href="quizzes.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Quizzes</a></li>
+                        <li><a href="progress.html" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-500/20 transition">Progress</a></li>
+                        <li><a href="references.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Reference</a></li>
+                    </ul>
+                </nav>
+
+                <!-- User Profile / Level Tag -->
+                <div class="flex items-center gap-3">
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div class="hidden sm:flex items-center gap-3 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white">
+                            HS
+                        </div>
+                        <div class="text-xs">
+                            <p class="font-semibold text-slate-200">Alex Rivers</p>
+                            <p class="text-cyan-400 text-[10px]">Student • Level 4</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Nav Dropdown -->
+            <div id="mobile-menu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-800">
+                <ul class="flex flex-col gap-2 text-sm font-medium">
+                    <li><a href="index.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Dashboard</a></li>
+                    <li><a href="quizzes.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Quizzes</a></li>
+                    <li><a href="progress.html" class="block px-4 py-2 rounded-lg bg-indigo-600 text-white">Progress</a></li>
+                    <li><a href="references.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Reference</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-grow space-y-8">
+            
+            <!-- Student Level & XP Hero Header -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-6 sm:p-10">
+                <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-12 -top-12 w-80 h-80 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                    <div class="space-y-3 max-w-xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                            <i class="fa-solid fa-fire text-[11px] animate-bounce"></i> 5-Day Learning Streak!
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                            Your AI Learning <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400">Roadmap & Mastery</span>
+                        </h1>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Track your reading accomplishments, quiz scores, and unlock achievement badges as you master deep learning architecture!
+                        </p>
+                    </div>
+
+                    <!-- Level Badge Card -->
+                    <div class="w-full lg:w-auto bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center gap-5 backdrop-blur-xl">
+                        <div class="relative flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/30">
+                                <div class="w-full h-full bg-slate-950 rounded-[14px] flex flex-col items-center justify-center">
+                                    <span class="text-[10px] text-cyan-400 font-extrabold uppercase tracking-widest">Level</span>
+                                    <span class="text-2xl font-black text-white">04</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 flex-grow">
+                            <div class="flex items-center justify-between gap-4 text-xs">
+                                <span class="text-slate-300 font-bold">Neural Scholar</span>
+                                <span class="text-cyan-400 font-mono font-semibold">1,420 / 2,000 XP</span>
+                            </div>
+                            <div class="w-48 sm:w-56 h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 w-[71%] rounded-full"></div>
+                            </div>
+                            <p class="text-[11px] text-slate-500">580 XP until Level 5 Master</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Performance Bar Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Course Progress</span>
+                            <i class="fa-solid fa-chart-line text-cyan-400"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white">33%</p>
+                        <p class="text-[11px] text-slate-500 mt-1">1 of 3 Essays Finished</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Avg Quiz Score</span>
+                            <i class="fa-solid fa-bullseye text-emerald-400"></i>
+                        </div>
+                        <p class="text-2xl font-black text-emerald-400">90%</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Highest: 100% in Essay 1</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Study Time</span>
+                            <i class="fa-solid fa-stopwatch text-indigo-400"></i>
+                        </div>
+                        <p class="text-2xl font-black text-white">24 m</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Target: 45 m this week</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                            <span>Badges Unlocked</span>
+                            <i class="fa-solid fa-award text-purple-400"></i>
+                        </div>
+                        <p class="text-2xl font-black text-purple-400">4 / 8</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Next: Matrix Architect</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Curriculum Modules Deep Dive -->
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap text-cyan-400"></i> Module Progress Breakdown
+                    </h2>
+                    <span class="text-xs text-slate-400 font-medium">Updated 10 minutes ago</span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    
+                    <!-- Module Item 1: Completed -->
+                    <div class="glass-card rounded-2xl p-6 transition-all duration-300 border-l-4 border-l-emerald-500">
+                        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                            <div class="space-y-2 max-w-2xl">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                                        Completed
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400">Module 01</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-white hover:text-cyan-400 transition-colors">
+                                    <a href="neural_networks_guide.html">Neural Networks & Architecture</a>
+                                </h3>
+                                <p class="text-slate-400 text-xs sm:text-sm">
+                                    Learned about input layers, hidden layer feature extraction, non-linearity, and activation functions (ReLU, Sigmoid, GELU).
+                                </p>
+                            </div>
+
+                            <div class="w-full lg:w-auto flex flex-wrap items-center justify-between lg:justify-end gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Quiz Score</p>
+                                    <p class="text-lg font-black text-emerald-400">5/5 (100%)</p>
+                                </div>
+
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Time Spent</p>
+                                    <p class="text-sm font-bold text-slate-200">9 mins</p>
+                                </div>
+
+                                <a href="neural_networks_guide.html" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                                    Review Essay &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Progress Line -->
+                        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-3">
+                            <div class="flex-grow h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-emerald-500 w-full rounded-full"></div>
+                            </div>
+                            <span class="text-[11px] font-bold text-emerald-400">100% Mastered</span>
+                        </div>
+                    </div>
+
+                    <!-- Module Item 2: In Progress / Pending -->
+                    <div class="glass-card rounded-2xl p-6 transition-all duration-300 border-l-4 border-l-amber-500">
+                        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                            <div class="space-y-2 max-w-2xl">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Not Started
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400">Module 02</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-white hover:text-purple-400 transition-colors">
+                                    <a href="quiz2.html">Weights & Biases Explained</a>
+                                </h3>
+                                <p class="text-slate-400 text-xs sm:text-sm">
+                                    Discover how neural networks tweak parameters during training to minimize prediction errors using loss functions.
+                                </p>
+                            </div>
+
+                            <div class="w-full lg:w-auto flex flex-wrap items-center justify-between lg:justify-end gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Quiz Score</p>
+                                    <p class="text-sm font-bold text-slate-500">Unattempted</p>
+                                </div>
+
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Est. Read Time</p>
+                                    <p class="text-sm font-bold text-slate-200">10 mins</p>
+                                </div>
+
+                                <a href="quiz2.html" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-purple-500/20 transition">
+                                    Start Lesson &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Progress Line -->
+                        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-3">
+                            <div class="flex-grow h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-amber-500 w-[0%] rounded-full"></div>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-500">0% Mastered</span>
+                        </div>
+                    </div>
+
+                    <!-- Module Item 3: Locked / Future -->
+                    <div class="glass-card rounded-2xl p-6 transition-all duration-300 border-l-4 border-l-slate-700 opacity-80">
+                        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                            <div class="space-y-2 max-w-2xl">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-400">
+                                        Next Up
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-400">Module 03</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-200">
+                                    <a href="quiz3.html" class="hover:text-emerald-400 transition-colors">Why We Use LLM Models</a>
+                                </h3>
+                                <p class="text-slate-400 text-xs sm:text-sm">
+                                    Explore modern Large Language Models, transformer self-attention mechanisms, and generative AI features.
+                                </p>
+                            </div>
+
+                            <div class="w-full lg:w-auto flex flex-wrap items-center justify-between lg:justify-end gap-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Quiz Score</p>
+                                    <p class="text-sm font-bold text-slate-500">Unattempted</p>
+                                </div>
+
+                                <div class="text-left lg:text-right">
+                                    <p class="text-xs text-slate-400 font-semibold">Est. Read Time</p>
+                                    <p class="text-sm font-bold text-slate-200">12 mins</p>
+                                </div>
+
+                                <a href="quiz3.html" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition">
+                                    Preview &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Progress Line -->
+                        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-3">
+                            <div class="flex-grow h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-slate-700 w-[0%] rounded-full"></div>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-500">0% Mastered</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Achievement Badges Grid -->
+            <div class="space-y-6 pt-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i> Achievement Badges
+                        </h2>
+                        <p class="text-slate-400 text-xs mt-0.5">Collect trophies by completing readings, practice tests, and daily streaks.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Badge 1: Unlocked -->
+                    <div class="achievement-card unlocked p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition group">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400 shadow-lg shadow-emerald-500/10 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">First Neuron</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Finished Essay 1 on Network Architecture.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 2: Unlocked -->
+                    <div class="achievement-card unlocked p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition group">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-2xl text-cyan-400 shadow-lg shadow-cyan-500/10 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">5-Day Streak</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Logged in and learned 5 days in a row.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 3: Unlocked -->
+                    <div class="achievement-card unlocked p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition group">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-2xl text-indigo-400 shadow-lg shadow-indigo-500/10 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Perfect Score</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Scored 100% on any practice quiz.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 4: Unlocked -->
+                    <div class="achievement-card unlocked p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition group">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-2xl text-purple-400 shadow-lg shadow-purple-500/10 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Fast Reader</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Read through an essay in under 10 minutes.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 5: Locked -->
+                    <div class="achievement-card p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition opacity-60">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl text-slate-500">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-300">Gradient Guru</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Complete Module 2 on Weights & Biases.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">Locked</span>
+                    </div>
+
+                    <!-- Badge 6: Locked -->
+                    <div class="achievement-card p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition opacity-60">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl text-slate-500">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-300">Transformer Titan</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Master Module 3 on LLM Architecture.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">Locked</span>
+                    </div>
+
+                    <!-- Badge 7: Locked -->
+                    <div class="achievement-card p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition opacity-60">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl text-slate-500">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-300">Octo Graduate</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Complete all 3 AI curriculum modules.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">Locked</span>
+                    </div>
+
+                    <!-- Badge 8: Locked -->
+                    <div class="achievement-card p-4 rounded-2xl flex flex-col items-center text-center gap-3 relative transition opacity-60">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl text-slate-500">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-300">AI Specialist</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Score 100% on all 3 module quizzes.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">Locked</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Recent Activity History Log -->
+            <div class="space-y-4 pt-4">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-purple-400"></i> Recent Activity Log
+                </h2>
+
+                <div class="glass-card rounded-2xl p-6 divide-y divide-slate-800/80">
+                    
+                    <div class="py-3 flex items-center justify-between gap-4 text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-200">Completed Quiz: Neural Networks & Architecture</p>
+                                <p class="text-slate-500 text-[11px]">Scored 5/5 questions correctly (+250 XP)</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-500">2 hours ago</span>
+                    </div>
+
+                    <div class="py-3 flex items-center justify-between gap-4 text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                                <i class="fa-solid fa-book-open text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-200">Finished Reading: Essay 1 (8 min read)</p>
+                                <p class="text-slate-500 text-[11px]">Learned Activation Functions & Hidden Layers (+150 XP)</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-500">Yesterday</span>
+                    </div>
+
+                    <div class="py-3 flex items-center justify-between gap-4 text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                                <i class="fa-solid fa-user-plus text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-200">Started AI Curriculum Journey</p>
+                                <p class="text-slate-500 text-[11px]">Created Octo Student Account (+500 XP)</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-500">5 days ago</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <img src="icons/Octo-dark.gif" alt="Octo logo" class="w-5 h-5 object-contain">
+                    <span class="font-bold text-slate-400">Octo Learning Portal</span>
+                </div>
+                <p>&copy; 2026 Octo AI Education. Tailored for high school students.</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Preloader Logic
+            const preloader = document.getElementById('preloader');
+            const progressBar = document.getElementById('progress-bar');
+            let progress = 0;
+
+            const progressInterval = setInterval(() => {
+                progress += Math.floor(Math.random() * 25) + 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        preloader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => preloader.style.display = 'none', 500);
+                    }, 200);
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 80);
+
+            // Mobile Menu Toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+    <script src="loading.js"></script>
+</body>
+</html>

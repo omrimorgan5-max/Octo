@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octo - Your Learning Portal</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#0C7491',
+                            light: '#1293b8',
+                            dark: '#084f63',
+                        },
+                        secondary: {
+                            DEFAULT: '#93169C',
+                            light: '#b822c4',
+                            dark: '#6c0e73',
+                        },
+                        accent: {
+                            DEFAULT: '#048F6E',
+                            light: '#06b88e',
+                            dark: '#02614a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+
+    <!-- Loading Screen (Preloader with Octo GIF) -->
+    <div id="preloader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500">
+        <div class="relative flex flex-col items-center gap-4 p-8 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl max-w-xs w-full mx-4 text-center">
+            <!-- Animated GIF Logo -->
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-xl blur opacity-50"></div>
+                <img src="icons/Octo-dark.gif" alt="Loading Logo" class="relative w-20 h-20 object-contain rounded-xl bg-slate-950 p-1">
+            </div>
+            
+            <div class="space-y-1">
+                <span class="brand-name text-2xl font-black tracking-wider text-brand-gradient">OCTO</span>
+                <p class="text-xs text-slate-400 font-medium">Preparing your AI modules...</p>
+            </div>
+
+            <!-- Loading Progress Bar -->
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-primary via-secondary to-accent w-0 transition-all duration-300 ease-out"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-grow flex flex-col">
+        <!-- Compact Sticky Header -->
+        <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3 transition-all duration-200">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- Brand with GIF Logo -->
+                <div class="logo">
+                    <a href="index.html" class="flex items-center gap-3 group">
+                        <div class="relative">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-0 group-hover:opacity-75 transition duration-300"></div>
+                            <img src="icons/Octo-dark.gif" alt="Octo logo" class="main-logo relative w-10 h-10 object-contain rounded-lg bg-slate-900 border border-slate-700/60 p-0.5" id="logo">
+                        </div>
+                        <span class="brand-name text-2xl font-extrabold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary-light group-hover:to-secondary-light transition-all">
+                            Octo
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="navigation hidden md:block">
+                    <ul class="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-sm font-medium">
+                        <li><a href="index.html" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold shadow-md shadow-primary/20 transition">Dashboard</a></li>
+                        <li><a href="quizzes.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Quizzes</a></li>
+                        <li><a href="progress.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Progress</a></li>
+                        <li><a href="references.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Reference</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Dynamic User Profile -->
+                <div class="flex items-center gap-3">
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div class="hidden sm:flex items-center gap-3 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-xs text-white">
+                            HS
+                        </div>
+                        <div class="text-xs">
+                            <p id="profile-name" class="font-semibold text-slate-200">Alex Rivers</p>
+                            <p id="profile-tag" class="text-primary-light text-[10px]">Student • Level 4</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Nav Dropdown -->
+            <div id="mobile-menu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-800">
+                <ul class="flex flex-col gap-2 text-sm font-medium">
+                    <li><a href="index.html" class="block px-4 py-2 rounded-lg bg-primary text-white">Dashboard</a></li>
+                    <li><a href="quizzes.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Quizzes</a></li>
+                    <li><a href="progress.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Progress</a></li>
+                    <li><a href="references.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Reference</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-grow space-y-8">
+            
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-primary/20 to-slate-900 border border-slate-800 p-6 sm:p-10">
+                <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-secondary/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-72 h-72 bg-primary/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 max-w-2xl space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary-light text-xs font-semibold">
+                        <i class="fa-solid fa-bolt text-[10px] text-amber-400"></i> AI Foundations Course
+                    </div>
+                    <h1 id="title" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Octo <span class="text-brand-gradient">— Your learning portal</span>
+                    </h1>
+                    <p class="text-slate-400 text-sm sm:text-base">
+                        Master machine learning fundamentals through interactive essays, step-by-step visualizations, and quick quizzes designed for high school learners.
+                    </p>
+                </div>
+
+                <!-- Live Dynamic Stats Bar -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-primary/15 text-primary-light flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Modules</p>
+                            <p id="stat-modules-count" class="text-lg font-bold text-white">3 Lessons</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-secondary/15 text-secondary-light flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Read</p>
+                            <p id="stat-read-time" class="text-lg font-bold text-white">30 Minutes</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-accent/15 text-accent-light flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Practice</p>
+                            <p id="stat-questions" class="text-lg font-bold text-white">15 Questions</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-accent/15 text-accent-light flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Completion</p>
+                            <p id="overall-progress-text" class="text-lg font-bold text-accent-light">0% Done</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2 self-start">
+                    <i class="fa-solid fa-layer-group text-primary-light text-base"></i> Curriculum Essays & Quizzes
+                </h2>
+
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <!-- Filter Buttons -->
+                    <div class="inline-flex p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-semibold">
+                        <button class="filter-btn active px-3 py-1.5 rounded-lg bg-primary text-white transition" data-filter="all">All</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-filter="pending">Not Started</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition" data-filter="completed">Completed</button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative flex-grow md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="quiz-search" placeholder="Search topics..." class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl pl-8 pr-4 py-2 border border-slate-800 focus:outline-none focus:border-primary transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Grid -->
+            <div class="quiz-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Quiz Card 1 -->
+                <div class="quiz-card glass-card rounded-2xl p-6 flex flex-col justify-between relative transition-all duration-300 group" data-module-id="essay1" data-status="pending" data-title="neural networks & architecture">
+                    <div class="space-y-4">
+                        <div class="card-top flex items-center justify-between">
+                            <span class="quiz-badge px-3 py-1 rounded-full text-xs font-bold bg-primary/15 border border-primary/30 text-primary-light">
+                                Essay 1
+                            </span>
+                            <span class="status-badge status-pending px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Not Started
+                            </span>
+                        </div>
+
+                        <h3 class="quiz-title text-xl font-bold text-slate-100 group-hover:text-primary-light transition-colors">
+                            Neural Networks & Architecture
+                        </h3>
+
+                        <p class="quiz-desc text-slate-400 text-sm line-clamp-3 leading-relaxed">
+                            Learn how input layers, hidden layers, and activation functions help AI process complex data.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800/80 space-y-4">
+                        <div class="quiz-meta flex items-center justify-between text-xs text-slate-400 font-medium">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-slate-500"></i> 8 min read
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-slate-500"></i> 5 Questions
+                            </span>
+                        </div>
+
+                        <div class="card-action flex items-center gap-2">
+                            <a href="neural_networks_guide.html" class="btn-card flex-grow py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary hover:from-primary-light hover:to-secondary-light text-white font-semibold text-xs text-center shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                                Read Essay & Start &rarr;
+                            </a>
+                            <button class="toggle-status-btn p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-accent-light border border-slate-700/60 transition" title="Toggle Completion Status">
+                                <i class="fa-regular fa-circle-check text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card 2 -->
+                <div class="quiz-card glass-card rounded-2xl p-6 flex flex-col justify-between relative transition-all duration-300 group" data-module-id="essay2" data-status="pending" data-title="weights & biases explained">
+                    <div class="space-y-4">
+                        <div class="card-top flex items-center justify-between">
+                            <span class="quiz-badge badge-purple px-3 py-1 rounded-full text-xs font-bold bg-secondary/15 border border-secondary/30 text-secondary-light">
+                                Essay 2
+                            </span>
+                            <span class="status-badge status-pending px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Not Started
+                            </span>
+                        </div>
+
+                        <h3 class="quiz-title text-xl font-bold text-slate-100 group-hover:text-secondary-light transition-colors">
+                            Weights & Biases Explained
+                        </h3>
+
+                        <p class="quiz-desc text-slate-400 text-sm line-clamp-3 leading-relaxed">
+                            Discover how neural networks tweak parameters during training to minimize errors using gradient descent.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800/80 space-y-4">
+                        <div class="quiz-meta flex items-center justify-between text-xs text-slate-400 font-medium">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-slate-500"></i> 10 min read
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-slate-500"></i> 5 Questions
+                            </span>
+                        </div>
+
+                        <div class="card-action flex items-center gap-2">
+                            <a href="quiz2.html" class="btn-card flex-grow py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary hover:from-primary-light hover:to-secondary-light text-white font-semibold text-xs text-center shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                                Read Essay & Start &rarr;
+                            </a>
+                            <button class="toggle-status-btn p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-accent-light border border-slate-700/60 transition" title="Toggle Completion Status">
+                                <i class="fa-regular fa-circle-check text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card 3 -->
+                <div class="quiz-card glass-card rounded-2xl p-6 flex flex-col justify-between relative transition-all duration-300 group" data-module-id="essay3" data-status="pending" data-title="why we use llm models">
+                    <div class="space-y-4">
+                        <div class="card-top flex items-center justify-between">
+                            <span class="quiz-badge badge-accent px-3 py-1 rounded-full text-xs font-bold bg-accent/15 border border-accent/30 text-accent-light">
+                                Essay 3
+                            </span>
+                            <span class="status-badge status-pending px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Not Started
+                            </span>
+                        </div>
+
+                        <h3 class="quiz-title text-xl font-bold text-slate-100 group-hover:text-accent-light transition-colors">
+                            Why We Use LLM Models
+                        </h3>
+
+                        <p class="quiz-desc text-slate-400 text-sm line-clamp-3 leading-relaxed">
+                            Explore modern Large Language Models, transformer self-attention logic, and real-world generative applications.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800/80 space-y-4">
+                        <div class="quiz-meta flex items-center justify-between text-xs text-slate-400 font-medium">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock text-slate-500"></i> 12 min read
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-slate-500"></i> 5 Questions
+                            </span>
+                        </div>
+
+                        <div class="card-action flex items-center gap-2">
+                            <a href="quiz3.html" class="btn-card flex-grow py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary hover:from-primary-light hover:to-secondary-light text-white font-semibold text-xs text-center shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                                Read Essay & Start &rarr;
+                            </a>
+                            <button class="toggle-status-btn p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-accent-light border border-slate-700/60 transition" title="Toggle Completion Status">
+                                <i class="fa-regular fa-circle-check text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <img src="icons/Octo-dark.gif" alt="Octo logo" class="w-5 h-5 object-contain">
+                    <span class="font-bold text-slate-400">Octo Learning Portal</span>
+                </div>
+                <p>&copy; 2026 Octo AI Education. Tailored for high school students.</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- App JavaScript Logic -->
+    <script src="app.js"></script>
+</body>
+</html>

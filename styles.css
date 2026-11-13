@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap');
+
+:root {
+  /* Primary Color: Teal / Deep Blue-Green */
+  --color-primary: #0C7491;
+  --color-primary-light: #1293b8;
+  --color-primary-dark: #084f63;
+
+  /* Secondary Color: Magenta / Deep Purple */
+  --color-secondary: #93169C;
+  --color-secondary-light: #b822c4;
+  --color-secondary-dark: #6c0e73;
+
+  /* Accent Color: Emerald / Deep Green */
+  --color-accent: #048F6E;
+  --color-accent-light: #06b88e;
+  --color-accent-dark: #02614a;
+
+  --bg-dark: #030712;
+  --card-bg: rgba(15, 23, 42, 0.65);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: #f8fafc;
+}
+
+h1, h2, h3, h4, .brand-name {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card:hover {
+  border-color: rgba(12, 116, 145, 0.4);
+  box-shadow: 0 0 25px -5px rgba(12, 116, 145, 0.25);
+}
+
+/* Brand Text Gradient using Primary, Secondary, Accent */
+.text-brand-gradient {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-secondary-light) 50%, var(--color-accent-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}

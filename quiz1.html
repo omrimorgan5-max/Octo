@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz 1: Neural Networks & Architecture - Octo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        octo: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#0f172a',
+                            950: '#030712',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .brand-name {
+            font-family: 'Outfit', sans-serif;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .option-btn {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(30, 41, 59, 0.9);
+        }
+        .option-btn.selected {
+            border-color: #38bdf8;
+            background: rgba(14, 165, 233, 0.15);
+            box-shadow: 0 0 15px -3px rgba(56, 189, 248, 0.3);
+        }
+        .option-btn.correct {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important;
+        }
+        .option-btn.incorrect {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #f87171 !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-slate-900">
+
+    <!-- Loading Screen (Preloader with Octo GIF) -->
+    <div id="preloader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500">
+        <div class="relative flex flex-col items-center gap-4 p-8 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl max-w-xs w-full mx-4 text-center">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl blur opacity-40"></div>
+                <img src="icons/Octo-dark.gif" alt="Loading Logo" class="relative w-20 h-20 object-contain rounded-xl bg-slate-950 p-1">
+            </div>
+            
+            <div class="space-y-1">
+                <span class="brand-name text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400">OCTO</span>
+                <p class="text-xs text-slate-400 font-medium">Preparing Quiz Questions...</p>
+            </div>
+
+            <!-- Loading Progress Bar -->
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 w-0 transition-all duration-300 ease-out"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Header Navigation -->
+    <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3 transition-all duration-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand with GIF Logo -->
+            <div class="logo">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div class="relative">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-75 transition duration-300"></div>
+                        <img src="icons/Octo-dark.gif" alt="Octo logo" class="main-logo relative w-10 h-10 object-contain rounded-lg bg-slate-900 border border-slate-700/60 p-0.5" id="logo">
+                    </div>
+                    <span class="brand-name text-2xl font-extrabold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-400 transition-all">
+                        Octo
+                    </span>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="navigation hidden md:block">
+                <ul class="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-sm font-medium">
+                    <li><a href="index.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Dashboard</a></li>
+                    <li><a href="quizzes.html" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-500/20 transition">Quizzes</a></li>
+                    <li><a href="progress.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Progress</a></li>
+                    <li><a href="references.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Reference</a></li>
+                </ul>
+            </nav>
+
+            <!-- User Profile / Level Tag -->
+            <div class="flex items-center gap-3">
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="hidden sm:flex items-center gap-3 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white">
+                        HS
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-semibold text-slate-200">Alex Rivers</p>
+                        <p class="text-cyan-400 text-[10px]">Student • Level 4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-800">
+            <ul class="flex flex-col gap-2 text-sm font-medium">
+                <li><a href="index.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Dashboard</a></li>
+                <li><a href="quizzes.html" class="block px-4 py-2 rounded-lg bg-indigo-600 text-white">Quizzes</a></li>
+                <li><a href="progress.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Progress</a></li>
+                <li><a href="references.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Reference</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto space-y-8">
+            
+            <!-- Breadcrumb & Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
+                <a href="neural_networks_guide.html" class="inline-flex items-center gap-2 text-cyan-400 hover:underline">
+                    <i class="fa-solid fa-arrow-left"></i> Review Module 1 Essay
+                </a>
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full font-semibold">
+                        <i class="fa-solid fa-bolt text-amber-400"></i> +250 XP Reward
+                    </span>
+                    <span class="bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-slate-300">
+                        5 Multiple Choice Questions
+                    </span>
+                </div>
+            </div>
+
+            <!-- Quiz Header Banner -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="space-y-3 relative z-10">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 inline-block">
+                        Practice Quiz • Module 1
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        Neural Networks & Architecture
+                    </h1>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Test your understanding of input vectors, data scaling, hidden layer hierarchies, and activation functions. Select one answer per question!
+                    </p>
+                </div>
+
+                <!-- Quiz Live Progress Bar -->
+                <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between gap-4 text-xs">
+                    <span id="answered-count-text" class="text-slate-400 font-semibold">0 of 5 Answered</span>
+                    <div class="w-48 sm:w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div id="quiz-progress-fill" class="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <form id="quiz-form" class="space-y-6">
+
+                <!-- Question 1 -->
+                <div class="glass-card rounded-2xl p-6 space-y-4" data-qindex="1">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-cyan-400 uppercase tracking-wider">Question 01</span>
+                        <span class="text-slate-500 font-mono">1 Point</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white leading-snug">
+                        What is the primary function of the Input Layer in an artificial neural network?
+                    </h2>
+                    <div class="space-y-2.5">
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="A">
+                            <span>A) To make final predictions and output confidence scores.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="B">
+                            <span>B) To convert real-world data (pixels, text, audio) into numerical tensors.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="C">
+                            <span>C) To calculate gradients and update weights during backpropagation.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="D">
+                            <span>D) To apply non-linear curves to incoming data.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                    </div>
+                    <div class="explanation hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+                        <span class="font-bold text-cyan-400">Explanation:</span> Input nodes do not carry weights or perform activations; their sole task is translating external data into standard numeric arrays (tensors).
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="glass-card rounded-2xl p-6 space-y-4" data-qindex="2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-purple-400 uppercase tracking-wider">Question 02</span>
+                        <span class="text-slate-500 font-mono">1 Point</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white leading-snug">
+                        Why is Data Normalization (e.g. scaling input values between $0.0$ and $1.0$) essential before model training?
+                    </h2>
+                    <div class="space-y-2.5">
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="A">
+                            <span>A) It shrinks the image resolution so the AI runs faster.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="B">
+                            <span>B) It prevents features with large raw numbers (like income) from overpowering smaller features (like age).</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="C">
+                            <span>C) It automatically removes bad samples from the training dataset.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="D">
+                            <span>D) It converts non-linear math back into flat linear equations.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                    </div>
+                    <div class="explanation hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+                        <span class="font-bold text-purple-400">Explanation:</span> Scaling ensures all features contribute proportionally during gradient descent updates, preventing huge numbers from destabilizing optimization.
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="glass-card rounded-2xl p-6 space-y-4" data-qindex="3">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-pink-400 uppercase tracking-wider">Question 03</span>
+                        <span class="text-slate-500 font-mono">1 Point</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white leading-snug">
+                        How do Hidden Layers extract patterns from raw data?
+                    </h2>
+                    <div class="space-y-2.5">
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="A">
+                            <span>A) Through hierarchical extraction: detecting simple lines/edges first, then shapes, then full concepts.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="B">
+                            <span>B) By randomly deleting half of the pixels until only one answer remains.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="C">
+                            <span>C) By searching a pre-written dictionary stored in memory.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="D">
+                            <span>D) By converting all numbers into text sentences before computing.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                    </div>
+                    <div class="explanation hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+                        <span class="font-bold text-pink-400">Explanation:</span> Deep networks build abstractions layer-by-layer, starting from basic pixel edges and progressing to complex features like snout shapes or dog eyes.
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="glass-card rounded-2xl p-6 space-y-4" data-qindex="4">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-emerald-400 uppercase tracking-wider">Question 04</span>
+                        <span class="text-slate-500 font-mono">1 Point</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white leading-snug">
+                        What happens if a neural network does NOT use any Activation Functions?
+                    </h2>
+                    <div class="space-y-2.5">
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="A">
+                            <span>A) The network becomes too powerful and overfits instantly.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="B">
+                            <span>B) It collapses mathematically into a single linear equation, making it unable to learn complex curved patterns.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="C">
+                            <span>C) It can only output negative numbers.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="D">
+                            <span>D) The computer will throw a physical hardware error.</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                    </div>
+                    <div class="explanation hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+                        <span class="font-bold text-emerald-400">Explanation:</span> Stacking linear combinations without non-linear activation functions simplifies to a single linear equation ($W_{\text{combined}} X + b$), destroying deep learning capabilities.
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="glass-card rounded-2xl p-6 space-y-4" data-qindex="5">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-amber-400 uppercase tracking-wider">Question 05</span>
+                        <span class="text-slate-500 font-mono">1 Point</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white leading-snug">
+                        Which activation function acts like a threshold switch, outputting $0$ for negative values and preserving positive values as $f(z) = \max(0, z)$?
+                    </h2>
+                    <div class="space-y-2.5">
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="A">
+                            <span>A) Sigmoid</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="B">
+                            <span>B) Tanh</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="C">
+                            <span>C) ReLU (Rectified Linear Unit)</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                        <button type="button" class="option-btn w-full text-left p-4 rounded-xl text-xs sm:text-sm text-slate-200 flex items-center justify-between" data-value="D">
+                            <span>D) Softmax</span>
+                            <i class="fa-regular fa-circle text-slate-500 check-icon"></i>
+                        </button>
+                    </div>
+                    <div class="explanation hidden mt-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300">
+                        <span class="font-bold text-amber-400">Explanation:</span> ReLU is widely used because it is computationally efficient and helps prevent vanishing gradients for positive signals.
+                    </div>
+                </div>
+
+                <!-- Submit Action Button -->
+                <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <a href="neural_networks_guide.html" class="text-xs text-slate-400 hover:text-white transition">
+                        &larr; Back to Essay
+                    </a>
+                    <button type="button" id="submit-quiz-btn" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-indigo-500/25 transition-all opacity-50 cursor-not-allowed" disabled>
+                        Submit Quiz Answers
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- Results Summary Modal / Card -->
+            <div id="results-card" class="hidden glass-card rounded-3xl p-6 sm:p-8 space-y-6 border-2 border-emerald-500/40 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 uppercase tracking-widest border border-emerald-500/30">
+                            Quiz Completed
+                        </span>
+                        <h2 class="text-2xl font-black text-white mt-1">Module 1 Mastery Score</h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Final Score</p>
+                        <p id="final-score-text" class="text-3xl font-black text-emerald-400 mt-1">5 / 5</p>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Accuracy</p>
+                        <p id="final-percentage-text" class="text-3xl font-black text-cyan-400 mt-1">100%</p>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">XP Earned</p>
+                        <p id="final-xp-text" class="text-3xl font-black text-amber-400 mt-1">+250 XP</p>
+                    </div>
+                </div>
+
+                <p id="feedback-msg" class="text-sm text-slate-300 leading-relaxed text-center sm:text-left">
+                    Awesome job! You've mastered the fundamentals of input vectors, hidden layers, and non-linear activation functions.
+                </p>
+
+                <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button type="button" id="retry-btn" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition">
+                        <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry Quiz
+                    </button>
+                    
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <a href="progress.html" class="flex-grow sm:flex-grow-0 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs text-center border border-slate-700 transition">
+                            View Progress
+                        </a>
+                        <a href="quiz2.html" class="flex-grow sm:flex-grow-0 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs text-center shadow-lg shadow-indigo-500/20 transition">
+                            Next Module &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="icons/Octo-dark.gif" alt="Octo logo" class="w-5 h-5 object-contain">
+                <span class="font-bold text-slate-400">Octo Learning Portal</span>
+            </div>
+            <p>&copy; 2026 Octo AI Education. Tailored for high school students.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Preloader Simulation
+            const preloader = document.getElementById('preloader');
+            const progressBar = document.getElementById('progress-bar');
+            let progress = 0;
+
+            const progressInterval = setInterval(() => {
+                progress += Math.floor(Math.random() * 25) + 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        preloader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => preloader.style.display = 'none', 500);
+                    }, 200);
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 80);
+
+            // Mobile Navigation Toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Correct Answer Keys
+            const correctAnswers = {
+                1: 'B', // Input layer converts data to numerical tensors
+                2: 'B', // Data normalization prevents large features dominating
+                3: 'A', // Hierarchical extraction
+                4: 'B', // Linear collapse
+                5: 'C'  // ReLU = max(0, z)
+            };
+
+            const userAnswers = {};
+            const questionCards = document.querySelectorAll('.glass-card[data-qindex]');
+            const submitBtn = document.getElementById('submit-quiz-btn');
+            const answeredCountText = document.getElementById('answered-count-text');
+            const progressFill = document.getElementById('quiz-progress-fill');
+            const resultsCard = document.getElementById('results-card');
+
+            // Handle Option Clicking
+            questionCards.forEach(card => {
+                const qIndex = card.getAttribute('data-qindex');
+                const optionBtns = card.querySelectorAll('.option-btn');
+
+                optionBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Unselect all in this question
+                        optionBtns.forEach(b => {
+                            b.classList.remove('selected');
+                            const icon = b.querySelector('.check-icon');
+                            if (icon) icon.className = 'fa-regular fa-circle text-slate-500 check-icon';
+                        });
+
+                        // Select clicked
+                        btn.classList.add('selected');
+                        const icon = btn.querySelector('.check-icon');
+                        if (icon) icon.className = 'fa-solid fa-circle-check text-cyan-400 check-icon';
+
+                        // Save Answer
+                        userAnswers[qIndex] = btn.getAttribute('data-value');
+
+                        // Update Live Progress
+                        updateProgress();
+                    });
+                });
+            });
+
+            function updateProgress() {
+                const count = Object.keys(userAnswers).length;
+                answeredCountText.textContent = `${count} of 5 Answered`;
+                const percentage = (count / 5) * 100;
+                progressFill.style.width = `${percentage}%`;
+
+                if (count === 5) {
+                    submitBtn.removeAttribute('disabled');
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // Handle Submit Quiz
+            submitBtn.addEventListener('click', () => {
+                let score = 0;
+
+                questionCards.forEach(card => {
+                    const qIndex = card.getAttribute('data-qindex');
+                    const selectedVal = userAnswers[qIndex];
+                    const correctVal = correctAnswers[qIndex];
+                    const optionBtns = card.querySelectorAll('.option-btn');
+                    const explanation = card.querySelector('.explanation');
+
+                    if (explanation) explanation.classList.remove('hidden');
+
+                    optionBtns.forEach(btn => {
+                        const val = btn.getAttribute('data-value');
+                        btn.disabled = true;
+
+                        if (val === correctVal) {
+                            btn.classList.add('correct');
+                            const icon = btn.querySelector('.check-icon');
+                            if (icon) icon.className = 'fa-solid fa-circle-check text-emerald-400 check-icon';
+                        }
+
+                        if (val === selectedVal && selectedVal !== correctVal) {
+                            btn.classList.add('incorrect');
+                            const icon = btn.querySelector('.check-icon');
+                            if (icon) icon.className = 'fa-solid fa-circle-xmark text-rose-400 check-icon';
+                        }
+                    });
+
+                    if (selectedVal === correctVal) {
+                        score++;
+                    }
+                });
+
+                // Display Results Summary
+                const percentage = Math.round((score / 5) * 100);
+                const xp = score * 50; // 50 XP per correct question
+
+                document.getElementById('final-score-text').textContent = `${score} / 5`;
+                document.getElementById('final-percentage-text').textContent = `${percentage}%`;
+                document.getElementById('final-xp-text').textContent = `+${xp} XP`;
+
+                const feedbackMsg = document.getElementById('feedback-msg');
+                if (score === 5) {
+                    feedbackMsg.textContent = "🌟 Perfect Score! You've mastered input layers, hidden layer feature extraction, and activation functions!";
+                } else if (score >= 3) {
+                    feedbackMsg.textContent = "Great job! You have a solid grasp of neural network concepts. Review the explanations above to hit 100%!";
+                } else {
+                    feedbackMsg.textContent = "Good try! Neural networks take practice. Review Essay 1 and try again to unlock your mastery badge!";
+                }
+
+                resultsCard.classList.remove('hidden');
+                resultsCard.scrollIntoView({ behavior: 'smooth' });
+                submitBtn.style.display = 'none';
+            });
+
+            // Retry Quiz Button
+            const retryBtn = document.getElementById('retry-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    location.reload();
+                });
+            }
+        });
+    </script>
+    <script src="loading.js"></script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demystifying AI: How Neural Networks Think - Octo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        octo: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#0f172a',
+                            950: '#030712',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .brand-name {
+            font-family: 'Outfit', sans-serif;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-slate-900">
+
+    <!-- Loading Screen (Preloader with Octo GIF) -->
+    <div id="preloader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500">
+        <div class="relative flex flex-col items-center gap-4 p-8 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl max-w-xs w-full mx-4 text-center">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl blur opacity-40"></div>
+                <img src="icons/Octo-dark.gif" alt="Loading Logo" class="relative w-20 h-20 object-contain rounded-xl bg-slate-950 p-1">
+            </div>
+            
+            <div class="space-y-1">
+                <span class="brand-name text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400">OCTO</span>
+                <p class="text-xs text-slate-400 font-medium">Loading AI Essay...</p>
+            </div>
+
+            <!-- Loading Progress Bar -->
+            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 w-0 transition-all duration-300 ease-out"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Header Navigation -->
+    <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3 transition-all duration-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand with GIF Logo -->
+            <div class="logo">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div class="relative">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-75 transition duration-300"></div>
+                        <img src="icons/Octo-dark.gif" alt="Octo logo" class="main-logo relative w-10 h-10 object-contain rounded-lg bg-slate-900 border border-slate-700/60 p-0.5" id="logo">
+                    </div>
+                    <span class="brand-name text-2xl font-extrabold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-400 transition-all">
+                        Octo
+                    </span>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="navigation hidden md:block">
+                <ul class="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-sm font-medium">
+                    <li><a href="index.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Dashboard</a></li>
+                    <li><a href="quizzes.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Quizzes</a></li>
+                    <li><a href="progress.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Progress</a></li>
+                    <li><a href="references.html" class="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Reference</a></li>
+                </ul>
+            </nav>
+
+            <!-- User Profile / Badge -->
+            <div class="flex items-center gap-3">
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="hidden sm:flex items-center gap-3 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white">
+                        HS
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-semibold text-slate-200">Alex Rivers</p>
+                        <p class="text-cyan-400 text-[10px]">Student • Level 4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden mt-3 pt-3 border-t border-slate-800">
+            <ul class="flex flex-col gap-2 text-sm font-medium">
+                <li><a href="index.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Dashboard</a></li>
+                <li><a href="quizzes.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Quizzes</a></li>
+                <li><a href="progress.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Progress</a></li>
+                <li><a href="references.html" class="block px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800">Reference</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto space-y-12">
+            
+            <!-- Breadcrumb Navigation -->
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <a href="index.html" class="inline-flex items-center gap-2 hover:text-cyan-400 transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <span class="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+                    <i class="fa-solid fa-book-open text-cyan-400 text-[10px]"></i> Essay Module 1 of 3
+                </span>
+            </div>
+
+            <!-- Header Section -->
+            <header class="text-center space-y-4 border-b border-slate-800/80 pb-8">
+                <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase inline-block">
+                    AI Demystified • 8 Min Read
+                </span>
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    How AI Brains Actually Work
+                </h1>
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+                    Ever wondered how your phone recognizes your face, or how TikTok knows exactly what video you'll like? Let’s crack open the hood of <strong>Artificial Neural Networks</strong>.
+                </p>
+            </header>
+
+            <!-- Section 1: Intro -->
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-indigo-400 mb-4 flex items-center gap-3">
+                    <span class="bg-indigo-500/20 text-indigo-400 w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span>
+                    From Biological Brains to Code
+                </h2>
+                <div class="space-y-4 text-slate-300 leading-relaxed">
+                    <p>
+                        When you see a dog in real life, your brain instantly knows it's a dog. You don't sit down and measure its tail length or calculate its fur percentage—your brain's network of roughly <strong>86 billion biological neurons</strong> processes all that visual data in a fraction of a second.
+                    </p>
+                    <p>
+                        For decades, traditional computer code couldn't do this. Regular code relies on strict rules like <code>if/else</code> statements. But how do you write an <code>if/else</code> statement for every possible picture of a dog ever taken? It's impossible!
+                    </p>
+                    <div class="bg-slate-900/80 border-l-4 border-indigo-500 p-4 rounded-r-lg">
+                        <p class="font-semibold text-white">Enter Artificial Neural Networks (ANNs):</p>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Instead of giving a computer strict rules, we build a mathematical structure inspired by biological brains and let it <em>learn from examples</em>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Input Layer -->
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-purple-400 mb-4 flex items-center gap-3">
+                    <span class="bg-purple-500/20 text-purple-400 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span>
+                    The Input Layer: Translating the World into Numbers
+                </h2>
+                <div class="space-y-4 text-slate-300 leading-relaxed">
+                    <p>
+                        Computers don't see colors, hear sounds, or read words—they only understand <strong>numbers</strong>. The <strong>Input Layer</strong> acts as the digital translator that converts real-world items into mathematical arrays called <strong>tensors</strong>.
+                    </p>
+                    
+                    <!-- Diagram Card -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6 text-center">
+                        <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl">
+                            <div class="text-2xl mb-2">🖼️ Photos</div>
+                            <p class="text-xs text-slate-400">Converted to pixel grid numbers ($0$ to $255$ brightness values).</p>
+                        </div>
+                        <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl">
+                            <div class="text-2xl mb-2">📝 Text</div>
+                            <p class="text-xs text-slate-400">Words turned into lists of numbers called <em>embeddings</em>.</p>
+                        </div>
+                        <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl">
+                            <div class="text-2xl mb-2">🎵 Audio</div>
+                            <p class="text-xs text-slate-400">Sound waves broken down into frequency numbers over time.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-white">Why Scaling Math Matters (Data Normalization)</h3>
+                    <p>
+                        Imagine predicting if someone gets onto a varsity team using two inputs: <strong>Height in inches</strong> ($60$ to $80$) and <strong>Annual Income</strong> ($\$20,000$ to $\$500,000$).
+                    </p>
+                    <p>
+                        Because income numbers are giant, the computer would mistakenly assume income is thousands of times more important than height! To fix this, we normalize inputs to a small scale, usually between $0.0$ and $1.0$:
+                    </p>
+                    
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700/80 font-mono text-sm text-purple-300 overflow-x-auto">
+                        $$x_{\text{scaled}} = \frac{x - x_{\min}}{x_{\max} - x_{\min}}$$
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Hidden Layers -->
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-pink-400 mb-4 flex items-center gap-3">
+                    <span class="bg-pink-500/20 text-pink-400 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span>
+                    Hidden Layers: The Detective Work
+                </h2>
+                <div class="space-y-4 text-slate-300 leading-relaxed">
+                    <p>
+                        Squeezed between the input and output are the <strong>Hidden Layers</strong>. They're called "hidden" simply because we don't directly feed them data or directly read their final answer—they operate behind the scenes.
+                    </p>
+                    <p>
+                        Think of hidden layers as a team of detectives analyzing an image in stages:
+                    </p>
+
+                    <!-- Step Pyramid -->
+                    <div class="space-y-3 my-6">
+                        <div class="flex items-center gap-4 bg-slate-900/80 p-3 rounded-lg border-l-4 border-indigo-400">
+                            <span class="font-bold text-indigo-400 text-sm">Layer 1</span>
+                            <span class="text-sm">Detects simple raw lines, diagonal edges, and color changes.</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-slate-900/80 p-3 rounded-lg border-l-4 border-purple-400">
+                            <span class="font-bold text-purple-400 text-sm">Layer 2</span>
+                            <span class="text-sm">Combines lines into shapes, corners, circles, and textures.</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-slate-900/80 p-3 rounded-lg border-l-4 border-pink-400">
+                            <span class="font-bold text-pink-400 text-sm">Layer 3+</span>
+                            <span class="text-sm">Combines shapes into complex objects like eyes, snout shapes, or wheel rims.</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-white">What Happens Inside Each Artificial Neuron?</h3>
+                    <p>
+                        Each neuron performs two quick math steps:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-300 pl-2">
+                        <li>
+                            <strong>Multiply & Add (Weights and Biases):</strong> It multiplies every incoming signal by a weight ($w$), adds them together, and adds a small baseline threshold called a bias ($b$).
+                            <div class="my-2 bg-slate-900 p-3 rounded-lg font-mono text-center text-sm text-pink-300">
+                                $$z = (w_1 \cdot x_1) + (w_2 \cdot x_2) + \dots + b$$
+                            </div>
+                        </li>
+                        <li>
+                            <strong>Fire or Stay Quiet (Activation):</strong> It passes $z$ into an activation function to decide how strongly to send the signal to the next layer.
+                        </li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Section 4: Activation Functions -->
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-emerald-400 mb-4 flex items-center gap-3">
+                    <span class="bg-emerald-500/20 text-emerald-400 w-8 h-8 rounded-lg flex items-center justify-center text-sm">4</span>
+                    Activation Functions: The Spark of Non-Linearity
+                </h2>
+                <div class="space-y-4 text-slate-300 leading-relaxed">
+                    <p>
+                        Why do we need activation functions? Because without them, the entire neural network would just be doing basic linear math (drawing straight lines).
+                    </p>
+                    <p>
+                        Real-world data isn't straight—it's messy, curved, and complex. Activation functions bend the math so the AI can learn complex, curved boundaries.
+                    </p>
+
+                    <!-- Comparison Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                        <div class="bg-slate-900 p-5 rounded-xl border border-slate-700/70">
+                            <h4 class="font-bold text-emerald-400 text-lg mb-1">ReLU</h4>
+                            <p class="text-xs font-mono text-slate-400 mb-2">$f(z) = \max(0, z)$</p>
+                            <p class="text-xs text-slate-300">
+                                <strong>The Light Switch:</strong> If the signal is negative, output $0$. If positive, keep it as is. Super fast and popular!
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-900 p-5 rounded-xl border border-slate-700/70">
+                            <h4 class="font-bold text-cyan-400 text-lg mb-1">Sigmoid</h4>
+                            <p class="text-xs font-mono text-slate-400 mb-2">$\sigma(z) = \frac{1}{1 + e^{-z}}$</p>
+                            <p class="text-xs text-slate-300">
+                                <strong>The Squisher:</strong> Squishes any number into a nice smooth percentage between $0.0$ ($0\%$) and $1.0$ ($100\%$).
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-900 p-5 rounded-xl border border-slate-700/70">
+                            <h4 class="font-bold text-amber-400 text-lg mb-1">GELU</h4>
+                            <p class="text-xs font-mono text-slate-400 mb-2">$z \cdot \Phi(z)$</p>
+                            <p class="text-xs text-slate-300">
+                                <strong>The Modern Standard:</strong> A smooth version of ReLU used in cutting-edge LLMs like ChatGPT and Claude!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto my-4">
+                        <table class="w-full text-left text-sm text-slate-300 border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-700 text-slate-400 uppercase text-xs">
+                                    <th class="py-2 px-3">Function</th>
+                                    <th class="py-2 px-3">Output Range</th>
+                                    <th class="py-2 px-3">Best Used For</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="py-2.5 px-3 font-semibold text-emerald-400">ReLU</td>
+                                    <td class="py-2.5 px-3">$[0, \infty)$</td>
+                                    <td class="py-2.5 px-3">Hidden layers in computer vision</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-semibold text-cyan-400">Sigmoid</td>
+                                    <td class="py-2.5 px-3">$(0, 1)$</td>
+                                    <td class="py-2.5 px-3">Yes/No binary predictions</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-semibold text-amber-400">GELU</td>
+                                    <td class="py-2.5 px-3">$\approx (-0.17, \infty)$</td>
+                                    <td class="py-2.5 px-3">Modern AI Transformers & Text Models</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Step-by-Step Example -->
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-amber-400 mb-4 flex items-center gap-3">
+                    <span class="bg-amber-500/20 text-amber-400 w-8 h-8 rounded-lg flex items-center justify-center text-sm">5</span>
+                    Putting It All Together: Cat vs. Dog
+                </h2>
+                
+                <p class="text-slate-300 mb-6">
+                    Let's trace how a photo travels through the whole system:
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-center text-xs">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-indigo-400 font-bold uppercase mb-1">Step 1</div>
+                        <div class="font-semibold text-slate-200 mb-2">Input Layer</div>
+                        <p class="text-slate-400">Feed in $28 \times 28$ pixels ($784$ total numbers scaled between $0.0$ and $1.0$).</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-purple-400 font-bold uppercase mb-1">Step 2</div>
+                        <div class="font-semibold text-slate-200 mb-2">Hidden Layer 1</div>
+                        <p class="text-slate-400">Calculates linear weights and applies <strong>ReLU</strong> to detect sharp edges.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-pink-400 font-bold uppercase mb-1">Step 3</div>
+                        <div class="font-semibold text-slate-200 mb-2">Hidden Layer 2</div>
+                        <p class="text-slate-400">Combines edges into floppy ears, whiskers, and muzzle shapes.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-emerald-400 font-bold uppercase mb-1">Step 4</div>
+                        <div class="font-semibold text-slate-200 mb-2">Output Layer</div>
+                        <p class="text-slate-400">Outputs final odds: <br><strong class="text-emerald-400">Dog: 94%</strong> | Cat: 6%</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary / Takeaways -->
+            <footer class="bg-gradient-to-r from-indigo-900/40 via-purple-900/40 to-pink-900/40 border border-slate-700/60 rounded-2xl p-6 sm:p-8">
+                <h3 class="text-xl font-bold text-white mb-3">Quick Takeaways to Remember 🧠</h3>
+                <ul class="space-y-2 text-sm text-slate-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-indigo-400">✦</span>
+                        <span><strong>Input Layer:</strong> Converts real-world images, text, or audio into standardized numbers.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-purple-400">✦</span>
+                        <span><strong>Hidden Layers:</strong> The pattern detectors that find simple features first, then combine them into complex concepts.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-400">✦</span>
+                        <span><strong>Activation Functions:</strong> The non-linear "switches" that give the network power to handle complex, curved real-world problems.</span>
+                    </li>
+                </ul>
+
+                <!-- Action Bar -->
+                <div class="mt-6 pt-6 border-t border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <a href="index.html" class="text-slate-400 hover:text-white text-xs font-medium transition">
+                        &larr; Return to Dashboard
+                    </a>
+                    <a href="quiz1.html" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition text-center">
+                        Take Module 1 Quiz &rarr;
+                    </a>
+                </div>
+            </footer>
+
+        </div>
+    </main>
+
+    <!-- Page Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="icons/Octo-dark.gif" alt="Octo logo" class="w-5 h-5 object-contain">
+                <span class="font-bold text-slate-400">Octo Learning Portal</span>
+            </div>
+            <p>&copy; 2026 Octo AI Education. Tailored for high school students.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Preloader Logic
+            const preloader = document.getElementById('preloader');
+            const progressBar = document.getElementById('progress-bar');
+            let progress = 0;
+
+            const progressInterval = setInterval(() => {
+                progress += Math.floor(Math.random() * 25) + 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        preloader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => preloader.style.display = 'none', 500);
+                    }, 200);
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 80);
+
+            // Mobile Menu Toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+    <script src="loading.js"></script>
+</body>
+</html>
